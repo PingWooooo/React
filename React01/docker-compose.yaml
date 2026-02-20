@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # --- 新增 PostgreSQL 服務 ---
+  db:
+    image: postgres:15
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  # 後端服務
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app  # 讓程式碼變動時能即時更新
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  # 前端服務
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # 防止 node_modules 被覆蓋
+    depends_on:
+      - backend
+
+# 定義磁碟卷宗
+volumes:
+  db_data:
+  postgres_data:
